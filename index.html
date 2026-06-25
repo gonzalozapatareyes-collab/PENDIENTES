@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Pendientes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F4F4F6;
+    color: #1D1D1F;
+    padding: 32px 16px;
+    min-height: 100vh;
+  }
+  .contenedor {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .header {
+    background: #121755;
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-family: 'Barlow Condensed', 'Inter', sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: #F7DC4B;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .header .reloj {
+    font-size: 14px;
+    color: #E1E0E0;
+    text-align: right;
+  }
+  .header .reloj strong { color: #fff; font-size: 18px; }
+  .barra-agregar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  #input {
+    flex: 1;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 1.5px solid #E1E0E0;
+    border-radius: 10px;
+    background: #fff;
+    color: #1D1D1F;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  #input:focus { border-color: #4548FF; }
+  #btnAgregar {
+    padding: 14px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    background: #4548FF;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  #btnAgregar:hover { opacity: 0.85; }
+  .aviso {
+    padding: 14px 16px;
+    background: #FFF9E6;
+    border: 1.5px solid #F7DC4B;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #6b5d00;
+    margin-bottom: 20px;
+    display: none;
+    cursor: pointer;
+  }
+  .seccion-titulo {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 24px 0 10px 0;
+  }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1.5px solid #E1E0E0;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .item:hover { border-color: #4548FF; }
+  .item.completado { background: #FAFAFA; opacity: 0.65; }
+  .item input[type="checkbox"] {
+    width: 20px; height: 20px;
+    cursor: pointer;
+    accent-color: #4548FF;
+    flex-shrink: 0;
+  }
+  .item .texto { flex: 1; font-size: 15px; }
+  .item.completado .texto { text-decoration: line-through; color: #888; }
+  .item .borrar {
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1.5px solid #E1E0E0;
+    border-radius: 8px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .item .borrar:hover { color: #d32f2f; border-color: #d32f2f; }
+  .vacio {
+    padding: 48px 16px;
+    text-align: center;
+    color: #888;
+    font-size: 15px;
+  }
+  #btnLimpiar {
+    margin-top: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    border: 1.5px solid #E1E0E0;
+    border-radius: 8px;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #btnLimpiar:hover { background: #fff; border-color: #888; }
+  .estado-notif {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #666;
+  }
+  .estado-notif .badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .badge.ok { background: #E3F5EC; color: #1d7a4d; }
+  .badge.no { background: #FDEAEA; color: #c0392b; }
+  #btnProbar {
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1.5px solid #4548FF;
+    border-radius: 8px;
+    background: transparent;
+    color: #4548FF;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #btnProbar:hover { background: #4548FF; color: #fff; }
+  .pie {
+    margin-top: 24px;
+    padding: 16px;
+    background: #fff;
+    border: 1.5px solid #E1E0E0;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+  }
+  .pie strong { color: #121755; }
+</style>
+</head>
+<body>
+<div class="contenedor">
+  <div class="header">
+    <h1>Mis Pendientes</h1>
+    <div class="reloj">
+      <strong id="hora">--:--</strong><br>
+      <span id="fecha"></span>
+    </div>
+  </div>
+
+  <div class="barra-agregar">
+    <input type="text" id="input" placeholder="Nuevo pendiente..." autocomplete="off">
+    <button id="btnAgregar">Agregar</button>
+  </div>
+
+  <div class="aviso" id="aviso">Las notificaciones estan desactivadas. Clickea aqui para activarlas y recibir tus recordatorios.</div>
+
+  <div class="estado-notif" id="estadoNotif"></div>
+
+  <div id="lista"></div>
+
+  <div class="pie">
+    <strong>Recordatorios automaticos:</strong> a las 09:00, 12:00, 15:00 y 17:00 te llega una notificacion de Windows con tus pendientes activos. Todo se guarda solo en este navegador, asi que al apagar el PC y volver a abrir esta pagina recuperas tu avance con los tachados incluidos.
+  </div>
+</div>
+
+<script>
+  const HORARIOS = [9, 12, 15, 17];
+  let pendientes = [];
+  let notificadosHoy = new Set();
+
+  function cargar() {
+    const g = localStorage.getItem('pendientes_amplifica');
+    if (g) pendientes = JSON.parse(g);
+  }
+  function guardar() {
+    localStorage.setItem('pendientes_amplifica', JSON.stringify(pendientes));
+  }
+
+  function render() {
+    const lista = document.getElementById('lista');
+    const activos = pendientes.filter(p => !p.completado);
+    const completados = pendientes.filter(p => p.completado);
+
+    if (pendientes.length === 0) {
+      lista.innerHTML = '<div class="vacio">Sin pendientes. Agrega el primero arriba.</div>';
+      return;
+    }
+
+    let html = '';
+    if (activos.length > 0) {
+      html += '<div class="seccion-titulo">Pendientes (' + activos.length + ')</div>';
+      activos.forEach(p => {
+        html += '<div class="item">'
+          + '<input type="checkbox" onchange="toggle(' + p.id + ')">'
+          + '<span class="texto"></span>'
+          + '<button class="borrar" onclick="eliminar(' + p.id + ')">Eliminar</button>'
+          + '</div>';
+      });
+    }
+    if (completados.length > 0) {
+      html += '<div class="seccion-titulo">Completados (' + completados.length + ')</div>';
+      completados.forEach(p => {
+        html += '<div class="item completado">'
+          + '<input type="checkbox" checked onchange="toggle(' + p.id + ')">'
+          + '<span class="texto"></span>'
+          + '<button class="borrar" onclick="eliminar(' + p.id + ')">Eliminar</button>'
+          + '</div>';
+      });
+      html += '<button id="btnLimpiar" onclick="limpiar()">Borrar completados</button>';
+    }
+    lista.innerHTML = html;
+
+    const todos = [...activos, ...completados];
+    const spans = lista.querySelectorAll('.texto');
+    spans.forEach((s, i) => { s.textContent = todos[i].texto; });
+  }
+
+  function agregar() {
+    const input = document.getElementById('input');
+    const txt = input.value.trim();
+    if (txt) {
+      pendientes.unshift({ id: Date.now(), texto: txt, completado: false });
+      input.value = '';
+      guardar();
+      render();
+    }
+  }
+  function toggle(id) {
+    pendientes = pendientes.map(p => p.id === id ? { ...p, completado: !p.completado } : p);
+    guardar();
+    render();
+  }
+  function eliminar(id) {
+    pendientes = pendientes.filter(p => p.id !== id);
+    guardar();
+    render();
+  }
+  function limpiar() {
+    pendientes = pendientes.filter(p => !p.completado);
+    guardar();
+    render();
+  }
+
+  document.getElementById('btnAgregar').addEventListener('click', agregar);
+  document.getElementById('input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') agregar();
+  });
+
+  function actualizarReloj() {
+    const ahora = new Date();
+    const hh = String(ahora.getHours()).padStart(2, '0');
+    const mm = String(ahora.getMinutes()).padStart(2, '0');
+    document.getElementById('hora').textContent = hh + ':' + mm;
+    document.getElementById('fecha').textContent = ahora.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  function chequearNotificaciones() {
+    const ahora = new Date();
+    const h = ahora.getHours();
+    const m = ahora.getMinutes();
+    HORARIOS.forEach(hora => {
+      const clave = hora + '-' + ahora.toDateString();
+      if (h === hora && m === 0 && !notificadosHoy.has(clave)) {
+        const activos = pendientes.filter(p => !p.completado);
+        if (activos.length > 0 && Notification.permission === 'granted') {
+          const cuerpo = activos.slice(0, 5).map(p => '• ' + p.texto).join('\n')
+            + (activos.length > 5 ? '\n... y ' + (activos.length - 5) + ' mas' : '');
+          new Notification('Recordatorio de pendientes (' + activos.length + ')', {
+            body: cuerpo,
+            tag: 'pendientes',
+            requireInteraction: true
+          });
+        }
+        notificadosHoy.add(clave);
+      }
+    });
+    const hoy = ahora.toDateString();
+    notificadosHoy = new Set([...notificadosHoy].filter(k => k.includes(hoy)));
+  }
+
+  const aviso = document.getElementById('aviso');
+  const estadoNotif = document.getElementById('estadoNotif');
+
+  function pintarEstado() {
+    if (!('Notification' in window)) {
+      estadoNotif.innerHTML = '<span class="badge no">No disponible</span> Este navegador no soporta notificaciones.';
+      return;
+    }
+    const permiso = Notification.permission;
+    if (permiso === 'granted') {
+      estadoNotif.innerHTML = '<span class="badge ok">Activadas</span> '
+        + '<button id="btnProbar">Probar notificacion ahora</button>';
+      document.getElementById('btnProbar').addEventListener('click', () => {
+        new Notification('Prueba exitosa', {
+          body: 'Las notificaciones funcionan. Te avisare a las 09, 12, 15 y 17 hrs.',
+          tag: 'prueba',
+          requireInteraction: true
+        });
+      });
+    } else if (permiso === 'denied') {
+      estadoNotif.innerHTML = '<span class="badge no">Bloqueadas</span> '
+        + 'Tienes que habilitarlas a mano: clickea el icono a la izquierda de la URL, busca Notificaciones y ponlo en Permitir, luego recarga con F5.';
+    } else {
+      estadoNotif.innerHTML = '<span class="badge no">Sin activar</span> '
+        + '<button id="btnProbar">Activar notificaciones</button>';
+      document.getElementById('btnProbar').addEventListener('click', () => {
+        Notification.requestPermission().then(() => { revisarPermiso(); pintarEstado(); });
+      });
+    }
+  }
+
+  function revisarPermiso() {
+    if (!('Notification' in window)) { aviso.style.display = 'none'; return; }
+    if (Notification.permission === 'granted') {
+      aviso.style.display = 'none';
+    } else {
+      aviso.style.display = 'block';
+    }
+  }
+  aviso.addEventListener('click', () => {
+    Notification.requestPermission().then(() => { revisarPermiso(); pintarEstado(); });
+  });
+
+  cargar();
+  render();
+  actualizarReloj();
+  revisarPermiso();
+  pintarEstado();
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(() => { revisarPermiso(); pintarEstado(); });
+  }
+  setInterval(actualizarReloj, 1000);
+  setInterval(chequearNotificaciones, 20000);
+</script>
+</body>
+</html>
